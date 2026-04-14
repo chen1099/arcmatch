@@ -1,0 +1,12 @@
+5
+black (q0)
+black (q1)
+white (q2)
+black (q3)
+white (q4)
+5
+4 0 line
+0 3 line
+3 2 dotted_line
+2 1 dotted_line
+1 0 line
