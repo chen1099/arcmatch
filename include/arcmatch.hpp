@@ -489,32 +489,6 @@ namespace arcmatch {
                     if (found) break;
                 }
 
-                // for (int i = 0; i < peripheral.size(); i++) {
-                //     for (graph::GraphInt qj_idx: peripheral_set[i]) {
-                //         for (graph::GraphInt ti_idx: DV[qi.id]) {
-                //             if (DV[qj_idx].find(ti_idx) != DV[qj_idx].end()) {
-                //                 found = true;
-
-                //                 peripheral_set[i].insert(qi.id);
-
-                //                 if (DV[peripheral[i]].size() < DV[qi.id].size()) {
-                //                     peripheral[i] = qi.id;
-                //                 }
-
-                //                 break;
-                //             }
-                //         }
-
-                //         if (found) {
-                //             break;
-                //         }
-                //     }
-
-                //     if (found) {
-                //         break;
-                //     }
-                // }
-
                 if (!found) {
                     graph::GraphInt peripheral_id = peripheral.size();
                     peripheral.insert({peripheral_id, qi.id});
@@ -528,10 +502,6 @@ namespace arcmatch {
         }
 
         bool is_first = true;
-
-        // std::vector<bool> is_singleton_removed(singleton.size(), false);
-        // std::vector<bool> is_other_removed(other.size(), false);
-        // std::vector<bool> is_peripheral_removed(peripheral.size(), false);
 
         while (true) {
             graph::GraphInt first_v = -1;
