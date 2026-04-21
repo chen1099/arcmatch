@@ -540,7 +540,7 @@ namespace arcmatch {
         return ordered;
     }
 
-    void search_occurrences(const std::vector<graph::GraphInt> &theta, std::vector<graph::GraphInt> &theta2, Match<graph::GraphInt> &M, const graph::Graph &Gq, const graph::Graph &Gt, Domain<graph::GraphInt> &DV, Domain<graph::GraphInt> &DE) {
+    void search_occurrences(const std::vector<graph::GraphInt> &theta, std::vector<graph::GraphInt> &theta2, Match<graph::GraphInt> &curr_match, std::vector<Match<graph::GraphInt>> &M, const graph::Graph &Gq, const graph::Graph &Gt, Domain<graph::GraphInt> &DV, Domain<graph::GraphInt> &DE) {
         if (theta.size() == theta2.size()) return;
 
         graph::GraphInt curr_idx = theta2.size();
@@ -572,10 +572,10 @@ namespace arcmatch {
             graph::GraphInt ti_idx;
             graph::GraphInt tj_idx;
             
-            if (M[s_idx] == et.source) {
+            if (curr_match[s_idx] == et.source) {
                 ti_idx = et.source;
                 tj_idx = et.target;
-            } else if (M[s_idx] == et.target) {
+            } else if (curr_match[s_idx] == et.target) {
                 ti_idx = et.target;
                 tj_idx = et.source;
             } else {
@@ -618,19 +618,23 @@ namespace arcmatch {
             if (feasible) {
                 theta2.push_back(tj_idx);
                 
-                M[theta[curr_idx]] = theta2[curr_idx];
+                curr_match[theta[curr_idx]] = theta2[curr_idx];
 
-                if (theta.size() != theta2.size()) {
-                    search_occurrences(theta, theta2, M, Gq, Gt, DV, DE);
+                if (theta.size() == theta2.size()) {
+                    M.push_back(curr_match);
                 }
+                else {
+                    search_occurrences(theta, theta2, curr_match, M, Gq, Gt, DV, DE);
+                }
+
+                curr_match.erase(theta[curr_idx]);
 
                 theta2.pop_back();
             }
         }
     }
 
-    std::vector<Match<graph::GraphInt>> match(const graph::Graph &Gq, const graph::Graph &Gt, int lp) {
-
+    std::vector<Match<graph::GraphInt>> match(const graph::Graph &Gq, const graph::Graph &Gt, int lp, bool print_domains = false) {
         Domain<graph::GraphInt> DV = init_vertex_domain(Gq, Gt);
 
         arc_consistency(Gq, Gt, DV);
@@ -652,10 +656,10 @@ namespace arcmatch {
         for (graph::GraphInt ti_idx: DV[theta[0]]) {
             std::vector<graph::GraphInt> theta2 = { ti_idx };
 
-            M.emplace_back();
-            M.back()[theta[0]] = ti_idx;
+            Match<graph::GraphInt> curr_match;
+            curr_match[theta[0]] = ti_idx;
 
-            search_occurrences(theta, theta2, M.back(), Gq, Gt, DV, DE);
+            search_occurrences(theta, theta2, curr_match, M, Gq, Gt, DV, DE);
         }
 
         return M;
