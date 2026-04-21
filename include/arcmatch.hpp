@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <algorithm>
+#include <fstream>
 #include "graph.hpp"
 
 namespace arcmatch {
@@ -650,8 +651,12 @@ namespace arcmatch {
 
         std::vector<Match<graph::GraphInt>> M;
 
-        vertex_domain_print(Gq, Gt, DV);
-        edge_domain_print(Gq, Gt, DE);
+        if (print_domains) {
+            vertex_domain_print(Gq, Gt, DV);
+            edge_domain_print(Gq, Gt, DE);
+        }
+
+        if (theta.size() == 0) throw "Error: no matching subgraph is found.";
 
         for (graph::GraphInt ti_idx: DV[theta[0]]) {
             std::vector<graph::GraphInt> theta2 = { ti_idx };
@@ -713,6 +718,88 @@ namespace arcmatch {
         }
 
         std::cout << "End Printing Match Unordered." << std::endl;
+    }
+
+    void match_save_as_dot(const std::vector<Match<graph::GraphInt>> &M, const graph::Graph &Gt, const std::string &output_path) {
+        std::ofstream out(output_path);
+        std::string edge_keyword = "->";
+        std::unordered_map<graph::GraphInt, graph::GraphInt> node_matched;
+        std::unordered_set<graph::GraphInt> edge_matched;
+
+        if (out.fail()) return;
+
+        if (Gt.is_bidirected) {
+            edge_keyword = "--";
+
+            out << "graph {" << std::endl;
+        } else {
+            out << "digraph {" << std::endl;
+        }
+
+        for (graph::GraphInt i = 0; i < M.size(); i++) {
+            for (auto &n: M[i]) {
+                graph::GraphInt ti_idx = n.second;
+
+                node_matched.insert({ti_idx, i});
+            }
+
+            for (auto &n: M[i]) {
+                graph::GraphInt ti_idx = n.second;
+
+                for (auto &n: Gt.N()[ti_idx]) {
+                    graph::GraphInt tj_idx = n.first;
+                    graph::GraphInt et_idx = n.second;
+
+                    if (node_matched.find(tj_idx) != node_matched.end()) {
+                        if (node_matched[tj_idx] == i) {
+                            edge_matched.insert(et_idx);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (graph::GraphInt i = 0; i < Gt.V().size(); i++) {
+            graph::Node ti = Gt.V()[i];
+            std::string node_name = "node_" + std::to_string(i);
+
+            out << node_name;
+
+            out << "[";
+            if (node_matched.find(i) != node_matched.end()) {
+                out << "color=red" << ",";
+            }
+            if (ti.label != "") {
+                out << "label=" << node_name << "_" << ti.label << ",";
+            }
+            out << "]";
+
+            out << ";" << std::endl;
+        }
+
+        for (graph::GraphInt i = 0; i < Gt.E().size(); i++) {
+            graph::Edge et = Gt.E()[i];
+            graph::GraphInt ti_idx = et.source;
+            graph::GraphInt tj_idx = et.target;
+            std::string edge_name = "edge_" + std::to_string(i);
+
+            out << "node_" << ti_idx;
+            out << " " << edge_keyword << " ";
+            out << "node_" << tj_idx;
+
+            out << "[";
+            if (edge_matched.find(i) != edge_matched.end()) {
+                out << "color=red,";
+            }
+            if (et.label != "") {
+                out << "label=" << edge_name << "_" << et.label << ",";
+            }
+            out << "]";
+
+            out << ";" << std::endl;
+        }
+
+        out << "}";
     }
 }
 

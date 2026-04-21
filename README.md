@@ -37,7 +37,6 @@ g++ -std=c++11 example.cpp -o example
 
 
 ### TODO:
-- Add CLI support
 - Change refine_domain() to recursive function (just an idea)
 - Add directed graph read support (and update arcmatch for directed graph support)
 
