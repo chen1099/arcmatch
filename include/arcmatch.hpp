@@ -8,8 +8,6 @@
 #include <algorithm>
 #include "graph.hpp"
 
-// Warning: std::vector<graph::GraphInt>::max_size is bigger than std::unordered_set<graph::GraphInt>::max_size
-
 namespace arcmatch {
     template <typename T>
     using Domain = std::vector<std::unordered_set<T>>;
@@ -439,13 +437,10 @@ namespace arcmatch {
         return qj_idx;
     }
 
-    // TODO: Change from std::vector<graph::GraphInt> to std::unordered_set<graph::GraphInt>
     std::vector<graph::GraphInt> variable_ordering(const graph::Graph &Gq, const Domain<graph::GraphInt> &DV) {
         std::vector<graph::GraphInt> ordered;
 
         std::unordered_set<graph::GraphInt> singleton;
-        std::unordered_map<graph::GraphInt, graph::GraphInt> peripheral;
-        std::unordered_map<graph::GraphInt, std::unordered_set<graph::GraphInt>> peripheral_set;
         std::unordered_set<graph::GraphInt> other;
 
         for (graph::Node qi: Gq.V()) {
@@ -458,46 +453,6 @@ namespace arcmatch {
 
             if (is_added) continue;
 
-            if (Gq.N()[qi.id].size() == 1) {
-                bool found = false;
-
-                is_added = true;
-
-                for (auto it = peripheral.begin(); it != peripheral.end();) {
-                    graph::GraphInt peripheral_id = it->first;
-                    graph::GraphInt max_domain_qi = it->second;
-
-                    for (auto jt = peripheral_set[peripheral_id].begin(); jt != peripheral_set[peripheral_id].end();) {
-                        graph::GraphInt qj_idx = *jt;
-
-                        for (graph::GraphInt ti_idx: DV[qi.id]) {
-                            if (DV[qj_idx].find(ti_idx) != DV[qj_idx].end()) {
-                                found = true;
-
-                                peripheral_set[peripheral_id].insert(qi.id);
-
-                                if (DV[max_domain_qi].size() < DV[qi.id].size()) {
-                                    it->second = qi.id;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (found) break;
-                    }
-
-                    if (found) break;
-                }
-
-                if (!found) {
-                    graph::GraphInt peripheral_id = peripheral.size();
-                    peripheral.insert({peripheral_id, qi.id});
-                    peripheral_set.insert({peripheral_id, std::unordered_set<graph::GraphInt>({qi.id})});
-                }
-            }
-
-            if (is_added) continue;
-
             other.insert(qi.id);
         }
 
@@ -506,7 +461,6 @@ namespace arcmatch {
         while (true) {
             graph::GraphInt first_v = -1;
             auto first_singleton_it = singleton.end();
-            auto first_peripheral_it = peripheral.end();
             auto first_other_it = other.end();
 
             for (auto it = singleton.begin(); it != singleton.end();) {
@@ -540,42 +494,6 @@ namespace arcmatch {
 
             if (first_v != -1) {
                 singleton.erase(first_singleton_it);
-                ordered.push_back(first_v);
-                is_first = false;
-                continue;
-            }
-
-            for (auto it = peripheral.begin(); it != peripheral.end();) {
-                if (is_first) {
-                    first_v = it->second;
-                    first_peripheral_it = it;
-                    it++;
-                    continue;
-                }
-
-                if (first_v == -1) {
-                    if (N1(it->second, ordered, Gq) != 0) {
-                        first_v = it->second;
-                        first_peripheral_it = it;
-                        it++;
-                        continue;
-                    }
-
-                    it++;
-                } else {
-                    graph::GraphInt temp = get_first_v(first_v, it->second, ordered, Gq, DV);
-
-                    if (temp != first_v){
-                        first_v = temp;
-                        first_peripheral_it = it;
-                    }
-
-                    it++;
-                }
-            }
-
-            if (first_v != -1) {
-                peripheral.erase(first_peripheral_it);
                 ordered.push_back(first_v);
                 is_first = false;
                 continue;
