@@ -5,14 +5,38 @@ An subgraph isomorphism algorithm.
 C++ compiler with C++11 and above standard version(keyword "auto" used).
 
 ## Usage
-### Compile (Linux or MacOS)
+### Compile example(Linux or MacOS)
 ``` bash
 g++ -std=c++11 example.cpp -o example
 ```
-### Execute (Linux or MacOS)
+### Execute example(Linux or MacOS)
 ```bash
 ./example
 ```
+
+### Compile CLI(linux or MacOS)
+```bash
+g++ -std=c++11 arcmatch.cpp -o arcmatch
+```
+
+### Execute CLI(Linux or MacOS)
+```bash
+./arcmatch --help
+```
+#### The output:
+##### Usage: arcmatch [options]
+
+##### Required Arguments:
+- -q, --query <path>       Path to the query graph file.
+- -t, --target <path>      Path to the target graph file.
+
+##### Algorithm Options:
+- -lp, --length-path <n>   Set the path length for the arcmatch (Default: 2).
+- -p, --print              Print the arcmatch's internal data structures (Domain).
+
+##### General Options:
+- -h, --help               Show this help message and exit.
+- -o, --output <path>      Path to save the output graph(dot format).
 
 ## Graph file format
 - [n. vertex] = number
