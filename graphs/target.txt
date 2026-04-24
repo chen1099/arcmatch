@@ -1,0 +1,23 @@
+9
+white (t0)
+black (t1)
+black (t2)
+black (t3)
+black (t4)
+white (t5)
+white (t6)
+black (t7)
+white (t8)
+12
+0 1 line
+1 2 line
+0 3 line
+1 4 line
+2 5 dotted_line
+3 4 line
+4 5 dotted_line
+4 7 dotted_line
+4 8 dotted_line
+5 8 dotted_line
+6 7 line
+7 8 dotted_line
